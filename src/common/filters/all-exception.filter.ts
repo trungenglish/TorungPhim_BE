@@ -27,7 +27,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       status = exception.getStatus();
       const exRes = exception.getResponse();
 
-      // nếu response là object thì merge
       if (typeof exRes === 'object') {
         resBody = {
           ...resBody,
@@ -36,7 +35,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
           path: request.url,
         };
       } else {
-        // nếu là string thì gói lại cho chuẩn
         resBody = {
           ...resBody,
           message: exRes,
