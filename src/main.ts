@@ -1,8 +1,27 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import helmet from 'helmet';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  app.use(helmet());
+  app.enableCors();
+
+  const config = new DocumentBuilder()
+    .setTitle('TorungPhim API')
+    .setDescription('API cho trang web xem phim của Trung 🎬')
+    .setVersion('1.0')
+    .addTag('torungphim')
+    .build();
+  const documentFactory = () => SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, documentFactory);
+
   await app.listen(process.env.PORT ?? 3000);
 }
-bootstrap();
+bootstrap().catch((err) => {
+  console.error('Failed to start application', err);
+  process.exit(1);
+});
