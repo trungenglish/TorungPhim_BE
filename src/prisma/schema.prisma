@@ -1,0 +1,338 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// when you change this file, run `pnpx prisma format` to format it, and `pnpx prisma generate` to regenerate the Prisma Client
+// update database with `pnpx prisma db push` or `pnpx prisma migrate dev`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// === Enum ===
+enum Gender {
+  MALE // ♂️ Male
+  FEMALE // ♀️ Female
+  OTHER // ⚧ Other / Prefer not to say
+}
+
+enum MovieType {
+  MOVIE // 🎬 Movie
+  SERIES // 📺 Series
+}
+
+enum MovieStatus {
+  COMMING_SOON // ⏳ Coming soon
+  ONGOING // ▶️ Ongoing
+  COMPLETED // ✅ Completed
+  CANCELLED // ❌ Cancelled
+}
+
+enum RolePeople {
+  DIRECTOR // 🎥 Director
+  ACTOR // 🎭 Actor
+}
+
+enum CompanyType {
+  NETWORK // 📡 TV Network
+  PRODUCER // 🎞️ Production Company
+}
+
+enum VersionType {
+  SUBTITLED // 🔤 Có phụ đề 
+  DUBBED // 🎙️ Lồng tiếng 
+  VOICE_OVER // 🗣️ Thuyết minh 
+}
+
+enum ReactionType {
+  LIKE
+  DISLIKE
+}
+
+// === Models ===
+model User {
+  id            String   @id @default(uuid()) // 🔑 Primary key (tự tăng)
+  email         String   @unique @db.VarChar(255) // 📧 Email đăng nhập
+  phone         String?  @unique @db.VarChar(20) // 📱 Số điện thoại (tùy chọn)
+  password_hash String   @db.VarChar(255) // 🔐 Mật khẩu đã mã hóa (hashed)
+  username      String?  @unique @db.VarChar(50) // 👤 Tên hiển thị (duy nhất)
+  gender        Gender   @default(OTHER) // ⚧ Giới tính
+  avatar_url    String?  @db.VarChar(500) // 🖼️ Ảnh đại diện
+  created_at    DateTime @default(now()) // 🗓️ Thời điểm tạo
+  updated_at    DateTime @updatedAt // 🔁 Tự động cập nhật khi thay đổi
+
+  // Relations
+  Rating        Rating[]
+  Favorite      Favorite[]
+  WatchProgress WatchProgress[]
+  Comment       Comment[]
+  CommentLike   CommentLike[]
+}
+
+model Movie {
+  id              String      @id @default(cuid()) // 🔑 Primary key
+  title           String      @db.VarChar(500) // 🎬 Movie title (localized)
+  original_title  String?     @db.VarChar(500) // 🌍 Original language title
+  slug            String      @unique @db.VarChar(300) // 🔗 SEO-friendly URL identifier
+  description     String?     @db.Text // 📝 Movie description
+  type            MovieType // 📌 Movie or series
+  duration        Int? // ⏱️ Duration in minutes
+  status          MovieStatus @default(COMMING_SOON) // 📋 Current release status
+  imdb_rating     Decimal?    @db.Decimal(3, 1) // ⭐ IMDb rating
+  subtitled_count Int? // Total episodes with subtitles
+  dubbed_count    Int? // Total episodes with dubbed audio
+  voiceover_count Int? // Total episodes with voice-over
+  franchiseId     String? // Franchise ID chuỗi phim
+  partNumber      Int?
+  createdAt       DateTime    @default(now()) // 🗓️ Record creation time
+  updatedAt       DateTime    @updatedAt // 🗓️ Record last update time
+
+  // Relations
+  images        MovieImage[]
+  genres        MovieGenre[]
+  topics        MovieTopic[]
+  episodes      Episode[]
+  seasons       Season[]
+  franchise     Franchise?      @relation(fields: [franchiseId], references: [id])
+  companies     MovieCompany[]
+  peoples       MoviePeople[]
+  Rating        Rating[]
+  Favorite      Favorite[]
+  WatchProgress WatchProgress[]
+  Comment       Comment[]
+}
+
+model Episode {
+  id            String      @id @default(cuid())
+  movieId       String
+  seasonId      String
+  versionType   VersionType @default(SUBTITLED)
+  episodeNumber Int
+  title         String      @db.VarChar(255)
+  description   String      @db.Text
+  duration      Int?
+  releaseDate   DateTime
+  videoUrl      String?     @db.VarChar(500)
+  trailerUrl    String?     @db.VarChar(500)
+  status        MovieStatus @default(COMMING_SOON)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // Relations
+  movie           Movie           @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  season          Season          @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  watchProgresses WatchProgress[]
+}
+
+model Season {
+  id           String   @id @default(cuid())
+  movieId      String
+  seasonNumber Int
+  title        String   @db.VarChar(255)
+  description  String   @db.Text
+  episodeCount Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  movie    Movie     @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  episodes Episode[]
+}
+
+model Franchise {
+  id        String   @id @default(cuid())
+  name      String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+
+  // Relations
+  movies Movie[]
+}
+
+model MovieImage {
+  id        String   @id @default(cuid())
+  movieId   String
+  path      String   @db.VarChar(500)
+  type      String   @db.VarChar(50)
+  format    String   @db.VarChar(50)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  movie Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
+}
+
+model MovieGenre {
+  movie     Movie    @relation(fields: [movieId], references: [id])
+  movieId   String
+  genre     Genre    @relation(fields: [genreId], references: [id])
+  genreId   String
+  createdAt DateTime @default(now())
+
+  @@id([movieId, genreId])
+}
+
+model Genre {
+  id        String   @id @default(cuid())
+  name      String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+
+  // Relations
+  movies MovieGenre[]
+}
+
+model Topic {
+  id          String   @id @default(cuid())
+  name        String   @db.VarChar(255)
+  description String   @db.Text
+  slug        String   @unique @db.VarChar(255)
+  createdAt   DateTime @default(now())
+
+  // Relations
+  movies MovieTopic[]
+}
+
+model MovieTopic {
+  movieId   String
+  movie     Movie    @relation(fields: [movieId], references: [id])
+  topicId   String
+  topic     Topic    @relation(fields: [topicId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@id([movieId, topicId])
+}
+
+model Company {
+  id        String      @id @default(cuid())
+  name      String      @db.VarChar(255)
+  type      CompanyType
+  country   String      @db.VarChar(255)
+  createdAt DateTime    @default(now())
+
+  // Relations
+  movies MovieCompany[]
+}
+
+model MovieCompany {
+  movieId    String
+  movie      Movie    @relation(fields: [movieId], references: [id])
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@id([movieId, companyId])
+}
+
+model People {
+  id           String    @id @default(cuid())
+  originalName String    @db.VarChar(255)
+  birthDate    DateTime?
+  avatarUrl    String?   @db.VarChar(500)
+  nationality  String?   @db.VarChar(255)
+  biography    String?   @db.Text
+  gender       Gender?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  movies MoviePeople[]
+}
+
+model MoviePeople {
+  movieId   String
+  movie     Movie      @relation(fields: [movieId], references: [id])
+  peopleId  String
+  people    People     @relation(fields: [peopleId], references: [id])
+  role      RolePeople
+  createdAt DateTime   @default(now())
+
+  @@id([movieId, peopleId])
+}
+
+model Rating {
+  id         String   @id @default(cuid())
+  userId     String
+  movieId    String
+  rating     Int
+  review     String?  @db.Text
+  isSpoiler  Boolean  @default(false)
+  likesCount Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id])
+  movie Movie @relation(fields: [movieId], references: [id])
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  movieId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id])
+  movie Movie @relation(fields: [movieId], references: [id])
+}
+
+model Comment {
+  id        String  @id @default(cuid())
+  userId    String
+  movieId   String
+  eposideId String
+  parentId  String?
+
+  content       String   @db.Text
+  likesCount    Int      @default(0)
+  dislikesCount Int      @default(0)
+  isSpoiler     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  user         User          @relation(fields: [userId], references: [id])
+  movie        Movie         @relation(fields: [movieId], references: [id])
+  parent       Comment?      @relation("CommentReplies", fields: [parentId], references: [id])
+  replies      Comment[]     @relation("CommentReplies")
+  commentLikes CommentLike[]
+}
+
+model CommentLike {
+  id        String       @id @default(cuid())
+  userId    String
+  commentId String
+  type      ReactionType
+  createdAt DateTime     @default(now())
+
+  // Relations
+  user    User    @relation(fields: [userId], references: [id])
+  comment Comment @relation(fields: [commentId], references: [id])
+
+  @@unique([userId, commentId]) // mỗi người chỉ được like 1 lần 1 bình luận
+}
+
+model WatchProgress {
+  id          String  @id @default(cuid())
+  userId      String
+  movieId     String
+  episodeId   String
+  currentTime Int // thời gian xem (giây)
+  isCompleted Boolean @default(false)
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  // Relations
+  user    User     @relation(fields: [userId], references: [id])
+  movie   Movie?   @relation(fields: [movieId], references: [id])
+  episode Episode? @relation(fields: [episodeId], references: [id])
+
+  @@unique([userId, movieId, episodeId])
+}
