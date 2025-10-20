@@ -2,33 +2,40 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import helmet from 'helmet';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { VersioningType } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { setupSwagger } from './config/swagger.config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const configService = app.get(ConfigService);
 
+  // Security
   app.use(helmet());
-  app.enableCors();
-  app.setGlobalPrefix('api');
-  app.enableVersioning({
-    type: VersioningType.URI,
-    defaultVersion: ['1', '2'],
+  app.enableCors({
+    origin: configService.get('CORS_ORIGIN', '*'),
+    credentials: true,
   });
 
-  const config = new DocumentBuilder()
-    .setTitle('TorungPhim API')
-    .setDescription('API cho trang web xem phim của Trung 🎬')
-    .setVersion('1.0')
-    .addTag('torungphim')
-    .build();
-  const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, documentFactory);
+  // Global prefix and versioning
+  app.setGlobalPrefix(configService.get('API_PREFIX', 'api'));
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion: String(configService.get('API_DEFAULT_VERSION', '1')).split(
+      ',',
+    ),
+  });
 
-  await app.listen(process.env.PORT ?? 3001);
+  // Swagger documentation
+  setupSwagger(app, configService);
+
+  // Start server
+  const port = Number(configService.get('PORT', 3001));
+  await app.listen(port);
+
+  console.log(`🚀 Application is running on: http://localhost:${port}`);
   console.log(
-    'Application started successfully on port',
-    process.env.PORT ?? 3001,
+    `📚 Swagger docs available at: http://localhost:${port}/${configService.get('SWAGGER_PATH', 'api/docs')}`,
   );
 }
 bootstrap().catch((err) => {
