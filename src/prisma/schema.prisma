@@ -64,6 +64,7 @@ model User {
   username      String?  @unique @db.VarChar(50) // 👤 Tên hiển thị (duy nhất)
   gender        Gender   @default(OTHER) // ⚧ Giới tính
   avatar_url    String?  @db.VarChar(500) // 🖼️ Ảnh đại diện
+  
   created_at    DateTime @default(now()) // 🗓️ Thời điểm tạo
   updated_at    DateTime @updatedAt // 🔁 Tự động cập nhật khi thay đổi
 
@@ -76,7 +77,8 @@ model User {
 }
 
 model Movie {
-  id              String      @id @default(cuid()) // 🔑 Primary key
+  id              String      @id @default(uuid()) // 🔑 Primary key
+  public_id       String      @unique @db.VarChar(255) // 🔑 Public ID
   title           String      @db.VarChar(500) // 🎬 Movie title (localized)
   original_title  String?     @db.VarChar(500) // 🌍 Original language title
   slug            String      @unique @db.VarChar(300) // 🔗 SEO-friendly URL identifier
@@ -109,7 +111,7 @@ model Movie {
 }
 
 model Episode {
-  id            String      @id @default(cuid())
+  id            String      @id @default(uuid())
   movieId       String
   seasonId      String
   versionType   VersionType @default(SUBTITLED)
@@ -131,7 +133,7 @@ model Episode {
 }
 
 model Season {
-  id           String   @id @default(cuid())
+  id           String   @id @default(uuid())
   movieId      String
   seasonNumber Int
   title        String   @db.VarChar(255)
@@ -146,7 +148,7 @@ model Season {
 }
 
 model Franchise {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   name      String   @db.VarChar(255)
   createdAt DateTime @default(now())
 
@@ -155,7 +157,7 @@ model Franchise {
 }
 
 model MovieImage {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   movieId   String
   path      String   @db.VarChar(500)
   type      String   @db.VarChar(50)
@@ -178,8 +180,9 @@ model MovieGenre {
 }
 
 model Genre {
-  id        String   @id @default(cuid())
-  name      String   @db.VarChar(255)
+  id        String   @id @default(uuid())
+  name      String   @db.VarChar(255) @unique
+  slug      String   @unique @db.VarChar(255)
   createdAt DateTime @default(now())
 
   // Relations
@@ -187,7 +190,7 @@ model Genre {
 }
 
 model Topic {
-  id          String   @id @default(cuid())
+  id          String   @id @default(uuid())
   name        String   @db.VarChar(255)
   description String   @db.Text
   slug        String   @unique @db.VarChar(255)
@@ -208,10 +211,11 @@ model MovieTopic {
 }
 
 model Company {
-  id        String      @id @default(cuid())
+  id        String      @id @default(uuid())
   name      String      @db.VarChar(255)
   type      CompanyType
   country   String      @db.VarChar(255)
+  slug      String      @unique @db.VarChar(255)
   createdAt DateTime    @default(now())
 
   // Relations
@@ -229,13 +233,15 @@ model MovieCompany {
 }
 
 model People {
-  id           String    @id @default(cuid())
+  id           String    @id @default(uuid())
+  public_id    String    @unique @db.VarChar(255)
   originalName String    @db.VarChar(255)
   birthDate    DateTime?
   avatarUrl    String?   @db.VarChar(500)
   nationality  String?   @db.VarChar(255)
   biography    String?   @db.Text
   gender       Gender?
+  slug         String    @unique @db.VarChar(255)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
@@ -255,7 +261,7 @@ model MoviePeople {
 }
 
 model Rating {
-  id         String   @id @default(cuid())
+  id         String   @id @default(uuid())
   userId     String
   movieId    String
   rating     Int
@@ -271,7 +277,7 @@ model Rating {
 }
 
 model Favorite {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   userId    String
   movieId   String
   createdAt DateTime @default(now())
@@ -283,7 +289,7 @@ model Favorite {
 }
 
 model Comment {
-  id        String  @id @default(cuid())
+  id        String  @id @default(uuid())
   userId    String
   movieId   String
   eposideId String
@@ -305,7 +311,7 @@ model Comment {
 }
 
 model CommentLike {
-  id        String       @id @default(cuid())
+  id        String       @id @default(uuid())
   userId    String
   commentId String
   type      ReactionType
@@ -319,7 +325,7 @@ model CommentLike {
 }
 
 model WatchProgress {
-  id          String  @id @default(cuid())
+  id          String  @id @default(uuid())
   userId      String
   movieId     String
   episodeId   String
