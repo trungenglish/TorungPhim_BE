@@ -16,7 +16,8 @@ export class HealthController {
   @HealthCheck()
   check() {
     return this.health.check([
-      () => this.http.pingCheck('nestjs-docs', 'https://docs.nestjs.com'),
+      () =>
+        this.http.pingCheck('torung-phim-be', 'http://localhost:3001/api/v1'),
     ]);
   }
 }

@@ -4,7 +4,7 @@ import { GenreController } from './genre.controller';
 
 @Module({
   controllers: [GenreController],
-  providers: [GenreService], // ✅ Không cần PrismaService nữa vì đã global
+  providers: [GenreService],
   exports: [GenreService],
 })
 export class GenreModule {}
