@@ -2,8 +2,8 @@ import {
   Controller,
   Get,
   // Post,
-  Body,
-  Patch,
+  // Body,
+  // Patch,
   Param,
   Delete,
 } from '@nestjs/common';
