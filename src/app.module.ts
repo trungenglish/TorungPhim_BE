@@ -15,8 +15,9 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { MoviesModule } from './modules/movies/movies.module';
 import { HealthModule } from './modules/health/health.module';
 import { envConfig, appConfig } from './config/env.config';
-import { PrismaService } from './prisma/prisma.service';
+import { PrismaModule } from './prisma/prisma.module';
 import { ValidationPipe } from './common/pipes/validation.pipe';
+import { GenreModule } from './modules/genre/genre.module';
 
 @Module({
   imports: [
@@ -25,8 +26,10 @@ import { ValidationPipe } from './common/pipes/validation.pipe';
       load: [appConfig],
     }),
     WinstonModule.forRootAsync(winstonConfig),
+    PrismaModule,
     AuthModule,
     UsersModule,
+    GenreModule,
     MoviesModule,
     HealthModule,
   ],
@@ -39,7 +42,6 @@ import { ValidationPipe } from './common/pipes/validation.pipe';
       provide: APP_PIPE,
       useClass: ValidationPipe,
     },
-    PrismaService,
   ],
 })
 export class AppModule implements NestModule {

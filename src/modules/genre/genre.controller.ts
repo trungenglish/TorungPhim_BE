@@ -1,0 +1,62 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
+import { GenreService } from './genre.service';
+import { CreateGenreDto } from './dto/create-genre.dto';
+import { UpdateGenreDto } from './dto/update-genre.dto';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiCommonResponses } from 'src/common/decorators/api-common-responses.decorator';
+
+@Controller('genre')
+export class GenreController {
+  constructor(private readonly genreService: GenreService) {}
+
+  @Post()
+  @ApiCommonResponses()
+  @ApiOperation({ summary: 'Tạo một thể loại mới' })
+  @ApiResponse({ status: 201, description: 'Tạo thành công.' })
+  handleCreateGenre(@Body() createGenreDto: CreateGenreDto) {
+    return this.genreService.create(createGenreDto);
+  }
+
+  @Get()
+  @ApiCommonResponses()
+  @ApiOperation({ summary: 'Lấy tất cả thể loại' })
+  @ApiResponse({ status: 200, description: 'Lấy tất cả thể loại thành công.' })
+  findAll() {
+    return this.genreService.findAll();
+  }
+
+  @Get(':id')
+  @ApiCommonResponses()
+  @ApiOperation({ summary: 'Lấy thể loại theo id' })
+  @ApiResponse({ status: 200, description: 'Lấy thể loại theo id thành công.' })
+  findOne(@Param('id') id: string) {
+    return this.genreService.findById(id);
+  }
+
+  @Patch(':id')
+  @ApiCommonResponses()
+  @ApiOperation({ summary: 'Cập nhật thể loại theo id' })
+  @ApiResponse({
+    status: 200,
+    description: 'Cập nhật thể loại theo id thành công.',
+  })
+  update(@Param('id') id: string, @Body() updateGenreDto: UpdateGenreDto) {
+    return this.genreService.update(id, updateGenreDto);
+  }
+
+  @Delete(':id')
+  @ApiCommonResponses()
+  @ApiOperation({ summary: 'Xóa thể loại theo id' })
+  @ApiResponse({ status: 204, description: 'Xóa thành công.' })
+  remove(@Param('id') id: string) {
+    return this.genreService.remove(id);
+  }
+}
