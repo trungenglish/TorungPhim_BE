@@ -5,33 +5,40 @@ import helmet from 'helmet';
 import { VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { setupSwagger } from './config/swagger.config';
+import { TransformResponseInterceptor } from './common/interceptors/transform-response.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
 
+  // 🛡️ Security middleware
   app.use(helmet());
   app.enableCors({
-    origin: configService.get('CORS_ORIGIN', '*'),
+    origin: configService.get('app.corsOrigin', '*'),
     credentials: true,
   });
 
-  app.setGlobalPrefix(configService.get('API_PREFIX', 'api'));
+  // 🌐 Prefix và version
+  app.setGlobalPrefix(configService.get('app.apiPrefix', 'api'));
   app.enableVersioning({
     type: VersioningType.URI,
-    defaultVersion: String(configService.get('API_DEFAULT_VERSION', '1')).split(
-      ',',
-    ),
+    defaultVersion: String(
+      configService.get('app.apiDefaultVersion', '1'),
+    ).split(','),
   });
 
+  // 📘 Swagger setup
   setupSwagger(app, configService);
 
-  const port = Number(configService.get('PORT', 3001));
+  // 🎨 Global interceptor (định dạng chuẩn mọi response)
+  app.useGlobalInterceptors(new TransformResponseInterceptor());
+
+  const port = Number(configService.get('app.port', 3001));
   await app.listen(port);
 
   console.log(`🚀 Application is running on: http://localhost:${port}`);
   console.log(
-    `📚 Swagger docs available at: http://localhost:${port}/${configService.get('SWAGGER_PATH', 'api/docs')}`,
+    `📚 Swagger docs available at: http://localhost:${port}/${configService.get('app.swaggerPath', 'api/docs')}`,
   );
 }
 bootstrap().catch((err) => {

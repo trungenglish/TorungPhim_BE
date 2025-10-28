@@ -7,14 +7,14 @@ export function setupSwagger(
   configService: ConfigService,
 ): void {
   const config = new DocumentBuilder()
-    .setTitle(configService.get('APP_NAME', 'TorungPhim API'))
+    .setTitle(configService.get('app.appName', 'TorungPhim API'))
     .setDescription(
       configService.get(
-        'APP_DESCRIPTION',
+        'app.appDescription',
         'API cho trang web xem phim của Trung 🎬',
       ),
     )
-    .setVersion(configService.get('APP_VERSION', '1.0'))
+    .setVersion(configService.get('app.appVersion', '1.0'))
     .addBearerAuth(
       {
         type: 'http',
@@ -27,11 +27,11 @@ export function setupSwagger(
       'JWT-auth',
     )
     .addServer(
-      configService.get('API_BASE_URL', 'http://localhost:3001'),
+      configService.get('app.apiBaseUrl', 'http://localhost:3001'),
       'Development server',
     )
     .addServer(
-      configService.get('API_PRODUCTION_URL', 'https://api.torungphim.com'),
+      configService.get('app.apiProductionUrl', 'https://api.torungphim.com'),
       'Production server',
     )
     .build();
@@ -42,7 +42,7 @@ export function setupSwagger(
   });
 
   SwaggerModule.setup(
-    configService.get('SWAGGER_PATH', 'api/docs'),
+    configService.get('app.swaggerPath', 'api/docs'),
     app,
     document,
     {
@@ -55,7 +55,7 @@ export function setupSwagger(
         showCommonExtensions: true,
         tryItOutEnabled: true,
       },
-      customSiteTitle: configService.get('APP_NAME', 'TorungPhim API'),
+      customSiteTitle: configService.get('app.appName', 'TorungPhim API'),
       customfavIcon: '/favicon.ico',
       customCss: `
         .swagger-ui .topbar { display: none }
