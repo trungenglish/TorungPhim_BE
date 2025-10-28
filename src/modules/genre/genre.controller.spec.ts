@@ -73,7 +73,7 @@ describe('GenreController', () => {
       const genresArray = [mockGenre];
       mockGenreService.findAll.mockResolvedValue(genresArray);
 
-      const result = await controller.findAll();
+      const result = await controller.handleFindAllGenre();
 
       // Kiểm tra: Hàm mock 'findAll' có được gọi không?
       expect(mockGenreService.findAll).toHaveBeenCalledTimes(1);
@@ -88,7 +88,7 @@ describe('GenreController', () => {
       const id = 'some-uuid-123';
       mockGenreService.findById.mockResolvedValue(mockGenre);
 
-      const result = await controller.findOne(id);
+      const result = await controller.handleFindOneGenre(id);
 
       // Kiểm tra: Hàm mock 'findById' có được gọi VỚI 'id' không?
       expect(mockGenreService.findById).toHaveBeenCalledWith(id);
@@ -101,11 +101,11 @@ describe('GenreController', () => {
     it('should call service.update with correct id and DTO', async () => {
       const id = 'some-uuid-123';
       const dto: UpdateGenreDto = { name: 'Hành động Mới' };
-      const updatedGenre = { ...mockGenre, ...dto }; // Kết quả giả
+      const updatedGenre = { ...mockGenre, ...dto };
 
       mockGenreService.update.mockResolvedValue(updatedGenre);
 
-      const result = await controller.update(id, dto);
+      const result = await controller.handleUpdateGenre(id, dto);
 
       // Kiểm tra: Hàm mock 'update' có được gọi VỚI 'id' và 'dto' không?
       expect(mockGenreService.update).toHaveBeenCalledWith(id, dto);
@@ -119,7 +119,7 @@ describe('GenreController', () => {
       const id = 'some-uuid-123';
       mockGenreService.remove.mockResolvedValue(mockGenre); // Giả sử hàm remove trả về object đã xóa
 
-      await controller.remove(id);
+      await controller.handleRemoveGenre(id);
 
       // Kiểm tra: Hàm mock 'remove' có được gọi VỚI 'id' không?
       expect(mockGenreService.remove).toHaveBeenCalledWith(id);
