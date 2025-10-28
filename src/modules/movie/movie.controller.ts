@@ -7,7 +7,7 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
-import { MoviesService } from './movies.service';
+import { MoviesService } from './movie.service';
 
 @Controller('movies')
 export class MoviesController {

@@ -29,7 +29,7 @@ export class GenreController {
   @ApiCommonResponses()
   @ApiOperation({ summary: 'Lấy tất cả thể loại' })
   @ApiResponse({ status: 200, description: 'Lấy tất cả thể loại thành công.' })
-  findAll() {
+  handleFindAllGenre() {
     return this.genreService.findAll();
   }
 
@@ -37,7 +37,7 @@ export class GenreController {
   @ApiCommonResponses()
   @ApiOperation({ summary: 'Lấy thể loại theo id' })
   @ApiResponse({ status: 200, description: 'Lấy thể loại theo id thành công.' })
-  findOne(@Param('id') id: string) {
+  handleFindOneGenre(@Param('id') id: string) {
     return this.genreService.findById(id);
   }
 
@@ -48,7 +48,10 @@ export class GenreController {
     status: 200,
     description: 'Cập nhật thể loại theo id thành công.',
   })
-  update(@Param('id') id: string, @Body() updateGenreDto: UpdateGenreDto) {
+  handleUpdateGenre(
+    @Param('id') id: string,
+    @Body() updateGenreDto: UpdateGenreDto,
+  ) {
     return this.genreService.update(id, updateGenreDto);
   }
 
@@ -56,7 +59,7 @@ export class GenreController {
   @ApiCommonResponses()
   @ApiOperation({ summary: 'Xóa thể loại theo id' })
   @ApiResponse({ status: 204, description: 'Xóa thành công.' })
-  remove(@Param('id') id: string) {
+  handleRemoveGenre(@Param('id') id: string) {
     return this.genreService.remove(id);
   }
 }

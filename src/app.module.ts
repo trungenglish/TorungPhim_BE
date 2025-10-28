@@ -8,16 +8,17 @@ import { ConfigModule } from '@nestjs/config';
 import { GlobalExceptionFilter } from './common/filters/all-exception.filter';
 import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 import { AuthModule } from './modules/auth/auth.module';
-import { UsersModule } from './modules/users/users.module';
+import { UsersModule } from './modules/user/user.module';
 import { winstonConfig } from './config/wiston.config';
 import { WinstonModule } from 'nest-winston';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
-import { MoviesModule } from './modules/movies/movies.module';
+import { MoviesModule } from './modules/movie/movie.module';
 import { HealthModule } from './modules/health/health.module';
 import { envConfig, appConfig } from './config/env.config';
 import { PrismaModule } from './prisma/prisma.module';
 import { ValidationPipe } from './common/pipes/validation.pipe';
 import { GenreModule } from './modules/genre/genre.module';
+import { TopicModule } from './modules/topic/topic.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { GenreModule } from './modules/genre/genre.module';
     AuthModule,
     UsersModule,
     GenreModule,
+    TopicModule,
     MoviesModule,
     HealthModule,
   ],

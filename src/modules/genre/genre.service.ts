@@ -12,16 +12,17 @@ import { Genre } from '@prisma/client';
  * LƯU Ý: Các hàm CRUD không dùng 'try...catch' vì các lỗi Prisma đã biết
  * (ví dụ: P2002 - Trùng lặp do @unique, hoặc P2025 - Không tìm thấy)
  * đã được tự động bắt và xử lý bởi 'GlobalExceptionFilter'.
+ * các trường hợp đặc biệt có thể dùng try...catch để xử lý
  */
 
 @Injectable()
 export class GenreService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createGenreDto: CreateGenreDto): Promise<Genre> {
+  create(createGenreDto: CreateGenreDto): Promise<Genre> {
     const slug = toSlug(createGenreDto.name);
 
-    return await this.prisma.genre.create({
+    return this.prisma.genre.create({
       data: {
         name: createGenreDto.name,
         slug: slug,
@@ -29,20 +30,20 @@ export class GenreService {
     });
   }
 
-  async findAll(): Promise<Genre[]> {
-    return await this.prisma.genre.findMany({
+  findAll(): Promise<Genre[]> {
+    return this.prisma.genre.findMany({
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  async findById(id: string): Promise<Genre> {
-    return await this.prisma.genre.findUniqueOrThrow({
+  findById(id: string): Promise<Genre> {
+    return this.prisma.genre.findUniqueOrThrow({
       where: { id: id },
     });
   }
 
-  async update(id: string, updateGenreDto: UpdateGenreDto) {
-    return await this.prisma.genre.update({
+  update(id: string, updateGenreDto: UpdateGenreDto) {
+    return this.prisma.genre.update({
       where: { id: id },
       data: {
         name: updateGenreDto.name,
@@ -51,8 +52,8 @@ export class GenreService {
     });
   }
 
-  async remove(id: string) {
-    return await this.prisma.genre.delete({
+  remove(id: string) {
+    return this.prisma.genre.delete({
       where: { id: id },
     });
   }
