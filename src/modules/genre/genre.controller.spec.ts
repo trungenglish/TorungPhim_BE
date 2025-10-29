@@ -100,7 +100,7 @@ describe('GenreController', () => {
   describe('update', () => {
     it('should call service.update with correct id and DTO', async () => {
       const id = 'some-uuid-123';
-      const dto: UpdateGenreDto = { name: 'Hành động Mới' };
+      const dto: UpdateGenreDto = { name: 'Chính kịch' };
       const updatedGenre = { ...mockGenre, ...dto };
 
       mockGenreService.update.mockResolvedValue(updatedGenre);
@@ -109,6 +109,9 @@ describe('GenreController', () => {
 
       // Kiểm tra: Hàm mock 'update' có được gọi VỚI 'id' và 'dto' không?
       expect(mockGenreService.update).toHaveBeenCalledWith(id, dto);
+
+      console.log('Giá trị trả về (result):', result);
+      console.log('Giá trị mong đợi (updatedGenre):', updatedGenre);
       expect(result).toEqual(updatedGenre);
     });
   });
