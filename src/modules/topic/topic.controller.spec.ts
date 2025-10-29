@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { GenreController } from './genre.controller';
-import { GenreService } from './genre.service';
-import { Genre } from '@prisma/client';
-import { UpdateGenreDto } from './dto/update-genre.dto';
-import { CreateGenreDto } from './dto/create-genre.dto';
+import { TopicController } from './topic.controller';
+import { TopicService } from './topic.service';
+import { Topic } from '@prisma/client';
+import { CreateTopicDto } from './dto/create-topic.dto';
+import { UpdateTopicDto } from './dto/update-topic.dto';
 
 // 1. TẠO MỘT SERVICE GIẢ
-const mockGenreService = {
+const mockTopicService = {
   create: jest.fn(),
   findAll: jest.fn(),
   findById: jest.fn(),
@@ -15,29 +15,29 @@ const mockGenreService = {
 };
 
 // 2. TẠO DỮ LIỆU MẪU
-const mockGenre: Genre = {
+const mockTopic: Topic = {
   id: 'some-uuid-123',
   name: 'Hành động',
+  description: 'Hành động là một thể loại phim',
   slug: 'hanh-dong',
   createdAt: new Date(),
 };
 
-describe('GenreController', () => {
-  let controller: GenreController;
+describe('TopicController', () => {
+  let controller: TopicController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [GenreController],
+      controllers: [TopicController],
       providers: [
-        // 3. "TRÁO HÀNG" (Provide)
         {
-          provide: GenreService,
-          useValue: mockGenreService,
+          provide: TopicService,
+          useValue: mockTopicService,
         },
       ],
     }).compile();
 
-    controller = module.get<GenreController>(GenreController);
+    controller = module.get<TopicController>(TopicController);
   });
 
   // 4. DỌN DẸP
@@ -52,33 +52,36 @@ describe('GenreController', () => {
   // === TEST HÀM CREATE (POST) ===
   describe('create', () => {
     it('should call service.create with the correct DTO', async () => {
-      const dto: CreateGenreDto = { name: 'Hành động' };
+      const dto: CreateTopicDto = {
+        name: 'Hành động',
+        description: 'Hành động là một thể loại phim',
+      };
 
       // Giả lập: "Khi hàm create được gọi, hãy trả về mockGenre"
-      mockGenreService.create.mockResolvedValue(mockGenre);
+      mockTopicService.create.mockResolvedValue(mockTopic);
 
       // Chạy hàm controller
-      const result = await controller.handleCreateGenre(dto);
+      const result = await controller.handleCreateTopic(dto);
 
       // Kiểm tra: Hàm mock 'create' có được gọi VỚI 'dto' không?
-      expect(mockGenreService.create).toHaveBeenCalledWith(dto);
+      expect(mockTopicService.create).toHaveBeenCalledWith(dto);
       // Kiểm tra: Controller có trả về đúng thứ mà service đã đưa không?
-      expect(result).toEqual(mockGenre);
+      expect(result).toEqual(mockTopic);
     });
   });
 
   // === TEST HÀM FINDALL (GET) ===
   describe('findAll', () => {
     it('should call service.findAll', async () => {
-      const genresArray = [mockGenre];
-      mockGenreService.findAll.mockResolvedValue(genresArray);
+      const topicsArray = [mockTopic];
+      mockTopicService.findAll.mockResolvedValue(topicsArray);
 
-      const result = await controller.handleFindAllGenre();
+      const result = await controller.handleFindAllTopic();
 
       // Kiểm tra: Hàm mock 'findAll' có được gọi không?
-      expect(mockGenreService.findAll).toHaveBeenCalledTimes(1);
+      expect(mockTopicService.findAll).toHaveBeenCalledTimes(1);
       // Kiểm tra: Kết quả trả về có đúng là mảng genres không?
-      expect(result).toEqual(genresArray);
+      expect(result).toEqual(topicsArray);
     });
   });
 
@@ -86,13 +89,13 @@ describe('GenreController', () => {
   describe('findOne', () => {
     it('should call service.findById with the correct id', async () => {
       const id = 'some-uuid-123';
-      mockGenreService.findById.mockResolvedValue(mockGenre);
+      mockTopicService.findById.mockResolvedValue(mockTopic);
 
-      const result = await controller.handleFindOneGenre(id);
+      const result = await controller.handleFindOneTopic(id);
 
       // Kiểm tra: Hàm mock 'findById' có được gọi VỚI 'id' không?
-      expect(mockGenreService.findById).toHaveBeenCalledWith(id);
-      expect(result).toEqual(mockGenre);
+      expect(mockTopicService.findById).toHaveBeenCalledWith(id);
+      expect(result).toEqual(mockTopic);
     });
   });
 
@@ -100,19 +103,22 @@ describe('GenreController', () => {
   describe('update', () => {
     it('should call service.update with correct id and DTO', async () => {
       const id = 'some-uuid-123';
-      const dto: UpdateGenreDto = { name: 'Chính kịch' };
-      const updatedGenre = { ...mockGenre, ...dto };
+      const dto: UpdateTopicDto = {
+        name: 'Chính kịch',
+        description: 'Chính kịch là một thể loại phim',
+      };
+      const updatedTopic = { ...mockTopic, ...dto };
 
-      mockGenreService.update.mockResolvedValue(updatedGenre);
+      mockTopicService.update.mockResolvedValue(updatedTopic);
 
-      const result = await controller.handleUpdateGenre(id, dto);
+      const result = await controller.handleUpdateTopic(id, dto);
 
       // Kiểm tra: Hàm mock 'update' có được gọi VỚI 'id' và 'dto' không?
-      expect(mockGenreService.update).toHaveBeenCalledWith(id, dto);
+      expect(mockTopicService.update).toHaveBeenCalledWith(id, dto);
 
       console.log('Giá trị trả về (result):', result);
-      console.log('Giá trị mong đợi (updatedGenre):', updatedGenre);
-      expect(result).toEqual(updatedGenre);
+      console.log('Giá trị mong đợi (updatedTopic):', updatedTopic);
+      expect(result).toEqual(updatedTopic);
     });
   });
 
@@ -120,12 +126,12 @@ describe('GenreController', () => {
   describe('remove', () => {
     it('should call service.remove with the correct id', async () => {
       const id = 'some-uuid-123';
-      mockGenreService.remove.mockResolvedValue(mockGenre); // Giả sử hàm remove trả về object đã xóa
+      mockTopicService.remove.mockResolvedValue(mockTopic);
 
-      await controller.handleRemoveGenre(id);
+      await controller.handleRemoveTopic(id);
 
       // Kiểm tra: Hàm mock 'remove' có được gọi VỚI 'id' không?
-      expect(mockGenreService.remove).toHaveBeenCalledWith(id);
+      expect(mockTopicService.remove).toHaveBeenCalledWith(id);
     });
   });
 });

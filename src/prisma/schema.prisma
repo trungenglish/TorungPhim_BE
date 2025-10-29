@@ -191,7 +191,7 @@ model Genre {
 
 model Topic {
   id          String   @id @default(uuid())
-  name        String   @db.VarChar(255)
+  name        String   @db.VarChar(255) @unique
   description String   @db.Text
   slug        String   @unique @db.VarChar(255)
   createdAt   DateTime @default(now())

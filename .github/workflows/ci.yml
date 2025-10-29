@@ -81,9 +81,8 @@ jobs:
     needs: build-and-test
     if: |
       needs.build-and-test.result == 'success' && (
-        github.event_name == 'pull_request' ||
-        github.ref == 'refs/heads/main' ||
-        github.ref == 'refs/heads/develop'
+        (github.event_name == 'pull_request' && github.base_ref == 'main') || 
+        github.ref == 'refs/heads/main'
       )
 
     steps:
@@ -94,6 +93,9 @@ jobs:
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
+        with:
+          args: >
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         continue-on-error: true
