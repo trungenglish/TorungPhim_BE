@@ -19,10 +19,10 @@ import { Genre } from '@prisma/client';
 export class GenreService {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(createGenreDto: CreateGenreDto): Promise<Genre> {
+  async create(createGenreDto: CreateGenreDto): Promise<Genre> {
     const slug = toSlug(createGenreDto.name);
 
-    return this.prisma.genre.create({
+    return await this.prisma.genre.create({
       data: {
         name: createGenreDto.name,
         slug: slug,
@@ -30,20 +30,20 @@ export class GenreService {
     });
   }
 
-  findAll(): Promise<Genre[]> {
-    return this.prisma.genre.findMany({
+  async findAll(): Promise<Genre[]> {
+    return await this.prisma.genre.findMany({
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  findById(id: string): Promise<Genre> {
-    return this.prisma.genre.findUniqueOrThrow({
+  async findById(id: string): Promise<Genre> {
+    return await this.prisma.genre.findUniqueOrThrow({
       where: { id: id },
     });
   }
 
-  update(id: string, updateGenreDto: UpdateGenreDto) {
-    return this.prisma.genre.update({
+  async update(id: string, updateGenreDto: UpdateGenreDto): Promise<Genre> {
+    return await this.prisma.genre.update({
       where: { id: id },
       data: {
         name: updateGenreDto.name,
@@ -52,8 +52,8 @@ export class GenreService {
     });
   }
 
-  remove(id: string) {
-    return this.prisma.genre.delete({
+  async remove(id: string): Promise<Genre> {
+    return await this.prisma.genre.delete({
       where: { id: id },
     });
   }

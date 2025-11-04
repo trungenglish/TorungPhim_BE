@@ -1,26 +1,77 @@
 import { Injectable } from '@nestjs/common';
-// import { CreateAuthDto } from './dto/create-auth.dto';
-// import { UpdateAuthDto } from './dto/update-auth.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { UserService } from '../user/user.service';
+import * as bcrypt from 'bcryptjs';
+import { UserWithAuthProviders } from '../user/types';
+import { JwtService } from '@nestjs/jwt';
+import { RegisterDto } from './dto/register.dto';
+import { ConflictException } from 'src/common/exceptions/conflict.exception';
 
 @Injectable()
 export class AuthService {
-  // create(createAuthDto: CreateAuthDto) {
-  //   return 'This action adds a new auth';
-  // }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
+    private readonly userService: UserService,
+  ) {}
 
-  findAll() {
-    return `This action returns all auth`;
+  async validateUser(
+    email: string,
+    password: string,
+  ): Promise<UserWithAuthProviders | null> {
+    const user = await this.userService.findByEmail(email);
+    if (user && user.AuthProvider.length > 0) {
+      const credentialsProvider = user.AuthProvider.find(
+        (provider) => provider.provider === 'CREDENTIALS',
+      );
+      if (credentialsProvider && credentialsProvider.passwordHash) {
+        const isValid = this.isValidPassword(
+          password,
+          credentialsProvider.passwordHash,
+        );
+        if (isValid) {
+          // Xóa AuthProvider đi trước khi trả về,
+          // không cần thiết phải trả về hash cho Passport
+          //delete user.AuthProvider;
+          return user;
+        }
+      }
+    }
+    return null;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
+  isValidPassword(password: string, hashedPassword: string): boolean {
+    return bcrypt.compareSync(password, hashedPassword);
   }
 
-  // update(id: number, updateAuthDto: UpdateAuthDto) {
-  //   return `This action updates a #${id} auth`;
-  // }
+  loginUser(user: UserWithAuthProviders) {
+    const payload = { email: user.email, sub: user.id };
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
+  }
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+  async register(registerDto: RegisterDto) {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: registerDto.email },
+    });
+    if (existingUser) {
+      throw new ConflictException('User already exists with this email');
+    }
+    const hashedPassword = bcrypt.hashSync(registerDto.password, 10);
+    return await this.prisma.user.create({
+      data: {
+        email: registerDto.email,
+        nickname: registerDto.nickname,
+        gender: 'OTHER',
+        role: 'USER',
+        AuthProvider: {
+          create: {
+            provider: 'CREDENTIALS',
+            passwordHash: hashedPassword,
+          },
+        },
+      },
+    });
   }
 }
