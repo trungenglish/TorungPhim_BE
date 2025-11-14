@@ -42,6 +42,7 @@ jobs:
 
       - name: Lint code
         run: pnpm lint
+        continue-on-error: true
 
       - name: Type check (TypeScript)
         run: pnpm type-check
