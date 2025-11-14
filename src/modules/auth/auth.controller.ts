@@ -12,7 +12,7 @@ import { LocalEmailAuthGuard } from './guard/local-auth.guard';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UserWithAuthProviders } from '../user/types';
-import { JwtAuthGuard } from './guard/jwt-auth.guard';
+import { Public } from 'src/common/decorators/public-route.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -20,6 +20,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
+  @Public()
   @UseGuards(LocalEmailAuthGuard)
   @ApiOperation({ summary: 'Login with email and password' })
   @ApiBody({ type: LoginDto })
@@ -31,12 +32,13 @@ export class AuthController {
   }
 
   @Post('register')
+  @Public()
+  @ApiOperation({ summary: 'Register with email and password' })
   handleRegister(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
   }
 
   @Get('profile')
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get user profile' })
   handleGetProfile(@Request() req: Request & { user: UserWithAuthProviders }) {
     return req.user;

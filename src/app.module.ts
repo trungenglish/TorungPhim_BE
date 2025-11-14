@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GlobalExceptionFilter } from './common/filters/all-exception.filter';
-import { APP_FILTER, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { winstonConfig } from './config/wiston.config';
@@ -19,6 +19,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ValidationPipe } from './common/pipes/validation.pipe';
 import { GenreModule } from './modules/genre/genre.module';
 import { TopicModule } from './modules/topic/topic.module';
+import { JwtAuthGuard } from './modules/auth/guard/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -36,6 +37,10 @@ import { TopicModule } from './modules/topic/topic.module';
     HealthModule,
   ],
   providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
     {
       provide: APP_FILTER,
       useClass: GlobalExceptionFilter,

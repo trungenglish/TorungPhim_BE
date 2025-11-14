@@ -12,6 +12,7 @@ import { CreateGenreDto } from './dto/create-genre.dto';
 import { UpdateGenreDto } from './dto/update-genre.dto';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ApiCommonResponses } from 'src/common/decorators/api-common-responses.decorator';
+import { Public } from 'src/common/decorators/public-route.decorator';
 
 @Controller('genre')
 export class GenreController {
@@ -26,6 +27,7 @@ export class GenreController {
   }
 
   @Get()
+  @Public()
   @ApiCommonResponses()
   @ApiOperation({ summary: 'Lấy tất cả thể loại' })
   @ApiResponse({ status: 200, description: 'Lấy tất cả thể loại thành công.' })
@@ -34,6 +36,7 @@ export class GenreController {
   }
 
   @Get(':id')
+  @Public()
   @ApiCommonResponses()
   @ApiOperation({ summary: 'Lấy thể loại theo id' })
   @ApiResponse({ status: 200, description: 'Lấy thể loại theo id thành công.' })
