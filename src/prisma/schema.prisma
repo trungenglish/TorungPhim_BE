@@ -76,8 +76,8 @@ model User {
   avatarUrl String? @map("avatar_url") @db.VarChar(500) // 🖼️ Ảnh đại diện
   role      UserRole @default(USER) // 📝 Vai trò của user
 
-  createAt DateTime @default(now()) @map("create_at") // 🗓️ Thời điểm tạo
-  updateAt DateTime @updatedAt @map("update_at") // 🔁 Tự động cập nhật khi thay đổi
+  createdAt DateTime @default(now()) @map("created_at") // 🗓️ Thời điểm tạo
+  updatedAt DateTime @updatedAt @map("updated_at") // 🔁 Tự động cập nhật khi thay đổi
 
   // Relations
   AuthProvider  AuthProvider[]
@@ -99,7 +99,6 @@ model AuthProvider {
   passwordHash String? @map("password_hash") @db.VarChar(255) // 🔐 Chỉ có giá trị khi là đăng ký 'credentials'
 
   // Bạn cũng có thể lưu token ở đây nếu cần
-  // accessToken       String?
   refreshToken String?
 
   createdAt DateTime @default(now()) // 🗓️ Thời điểm tạo

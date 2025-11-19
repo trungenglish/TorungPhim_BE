@@ -3,11 +3,11 @@ import {
   IsString,
   MaxLength,
   MinLength,
-  IsPhoneNumber,
   IsOptional,
   IsEnum,
 } from 'class-validator';
 import { Gender, UserRole } from '@prisma/client';
+import { Transform } from 'class-transformer';
 
 export class CreateUserDto {
   @IsString()
@@ -28,6 +28,7 @@ export class CreateUserDto {
   @MaxLength(32)
   password: string;
 
+  @Transform(({ value }: { value: string }) => value.toUpperCase())
   @IsEnum(Gender)
   gender: Gender;
 
@@ -36,6 +37,7 @@ export class CreateUserDto {
   @MaxLength(500)
   avatar_url?: string;
 
+  @Transform(({ value }: { value: string }) => value.toUpperCase())
   @IsEnum(UserRole)
   role: UserRole;
 }

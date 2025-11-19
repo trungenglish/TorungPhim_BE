@@ -83,10 +83,6 @@ describe('TopicService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   // === TEST HÀM CREATE ===
   describe('create', () => {
     it('should create a new topic', async () => {
@@ -98,7 +94,6 @@ describe('TopicService', () => {
 
       // Giả lập hàm create thành công
       mockPrismaService.topic.create.mockResolvedValue(mockTopic);
-
       const result = await service.create(createTopicDto);
 
       // Kiểm tra xem hàm 'toSlug' có được gọi đúng
@@ -173,7 +168,7 @@ describe('TopicService', () => {
 
   // === TEST HÀM UPDATE ===
   describe('update', () => {
-    it('should update a genre', async () => {
+    it('should update a topic', async () => {
       const updateTopicDto: UpdateTopicDto = { name: 'Hành động Mới' };
       const expectedSlug = 'hanh-dong-moi';
       const updatedTopic = {

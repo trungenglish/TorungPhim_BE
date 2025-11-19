@@ -26,6 +26,7 @@ export function setupSwagger(
       },
       'JWT-auth',
     )
+    .addSecurityRequirements('JWT-auth')
     .addServer(
       configService.get('app.apiBaseUrl', 'http://localhost:3001'),
       'Development server',
