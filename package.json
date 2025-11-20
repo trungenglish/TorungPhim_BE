@@ -19,7 +19,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "ci:local": "pnpm lint && pnpm type-check && pnpm audit --audit-level=high && pnpm run test:cov && pnpm run build"
   },
   "dependencies": {
     "@nestjs/axios": "^4.0.1",

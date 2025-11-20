@@ -20,6 +20,7 @@ export class AuthService {
     password: string,
   ): Promise<UserWithAuthProviders | null> {
     const user = await this.userService.findByEmail(email);
+
     if (user && user.AuthProvider.length > 0) {
       const credentialsProvider = user.AuthProvider.find(
         (provider) => provider.provider === 'CREDENTIALS',
@@ -37,6 +38,7 @@ export class AuthService {
         }
       }
     }
+
     return null;
   }
 
