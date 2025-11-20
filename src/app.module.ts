@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GlobalExceptionFilter } from './common/filters/all-exception.filter';
-import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { winstonConfig } from './config/wiston.config';
@@ -20,6 +20,8 @@ import { ValidationPipe } from './common/pipes/validation.pipe';
 import { GenreModule } from './modules/genre/genre.module';
 import { TopicModule } from './modules/topic/topic.module';
 import { JwtAuthGuard } from './modules/auth/guard/jwt-auth.guard';
+import { RolesGuard } from './common/guards/roles.guard';
+import { createAppGuards } from './common/helpers/module.helper';
 
 @Module({
   imports: [
@@ -37,10 +39,7 @@ import { JwtAuthGuard } from './modules/auth/guard/jwt-auth.guard';
     HealthModule,
   ],
   providers: [
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard,
-    },
+    ...createAppGuards(JwtAuthGuard, RolesGuard),
     {
       provide: APP_FILTER,
       useClass: GlobalExceptionFilter,

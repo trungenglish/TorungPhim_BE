@@ -50,6 +50,7 @@ export class AuthService {
       sub: user.id,
       iss: 'torungphim-be',
       aud: 'torungphim-fe',
+      role: user.role,
     };
     return {
       access_token: this.jwtService.sign(payload),
