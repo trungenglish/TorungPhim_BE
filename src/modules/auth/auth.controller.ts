@@ -1,34 +1,46 @@
-import { Controller, Get, Param, Delete } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Request,
+  UseGuards,
+  Get,
+} from '@nestjs/common';
+import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-// import { CreateAuthDto } from './dto/create-auth.dto';
-// import { UpdateAuthDto } from './dto/update-auth.dto';
+import { LocalEmailAuthGuard } from './guard/local-auth.guard';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
+import { UserWithAuthProviders } from '../user/types';
+import { Public } from 'src/common/decorators/public-route.decorator';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // @Post()
-  // create(@Body() createAuthDto: CreateAuthDto) {
-  //   return this.authService.create(createAuthDto);
-  // }
-
-  @Get()
-  findAll() {
-    return this.authService.findAll();
+  @Post('login')
+  @Public()
+  @UseGuards(LocalEmailAuthGuard)
+  @ApiOperation({ summary: 'Login with email and password' })
+  @ApiBody({ type: LoginDto })
+  handleLogin(
+    @Request()
+    req: Request & { user: UserWithAuthProviders },
+  ) {
+    return this.authService.loginUser(req.user);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
+  @Post('register')
+  @Public()
+  @ApiOperation({ summary: 'Register with email and password' })
+  handleRegister(@Body() registerDto: RegisterDto) {
+    return this.authService.register(registerDto);
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-  //   return this.authService.update(+id, updateAuthDto);
-  // }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+  @Get('profile')
+  @ApiOperation({ summary: 'Get user profile' })
+  handleGetProfile(@Request() req: Request & { user: UserWithAuthProviders }) {
+    return req.user;
   }
 }

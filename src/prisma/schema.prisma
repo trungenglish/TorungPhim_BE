@@ -16,6 +16,12 @@ datasource db {
 }
 
 // === Enum ===
+enum UserRole {
+  ADMIN
+  USER
+}
+
+
 enum Gender {
   MALE // ♂️ Male
   FEMALE // ♀️ Female
@@ -55,20 +61,26 @@ enum ReactionType {
   DISLIKE
 }
 
+enum Provider {
+  GOOGLE
+  CREDENTIALS
+}
+
 // === Models ===
 model User {
-  id            String   @id @default(uuid()) // 🔑 Primary key (tự tăng)
-  email         String   @unique @db.VarChar(255) // 📧 Email đăng nhập
-  phone         String?  @unique @db.VarChar(20) // 📱 Số điện thoại (tùy chọn)
-  password_hash String   @db.VarChar(255) // 🔐 Mật khẩu đã mã hóa (hashed)
-  username      String?  @unique @db.VarChar(50) // 👤 Tên hiển thị (duy nhất)
-  gender        Gender   @default(OTHER) // ⚧ Giới tính
-  avatar_url    String?  @db.VarChar(500) // 🖼️ Ảnh đại diện
-  
-  created_at    DateTime @default(now()) // 🗓️ Thời điểm tạo
-  updated_at    DateTime @updatedAt // 🔁 Tự động cập nhật khi thay đổi
+  id        String  @id @default(uuid()) // 🔑 Primary key (tự tăng)
+  email     String?  @unique @db.VarChar(255) // 📧 Email đăng nhập
+  username  String?  @unique @db.VarChar(50) // 👤 Tên hiển thị (duy nhất)
+  nickname  String @db.VarChar(50) // 👤 Nickname (tùy chọn)
+  gender    Gender  @default(OTHER) // ⚧ Giới tính
+  avatarUrl String? @map("avatar_url") @db.VarChar(500) // 🖼️ Ảnh đại diện
+  role      UserRole @default(USER) // 📝 Vai trò của user
+
+  createdAt DateTime @default(now()) @map("created_at") // 🗓️ Thời điểm tạo
+  updatedAt DateTime @updatedAt @map("updated_at") // 🔁 Tự động cập nhật khi thay đổi
 
   // Relations
+  AuthProvider  AuthProvider[]
   Rating        Rating[]
   Favorite      Favorite[]
   WatchProgress WatchProgress[]
@@ -76,24 +88,46 @@ model User {
   CommentLike   CommentLike[]
 }
 
+model AuthProvider {
+  id     String @id @default(uuid()) // 🔑 Primary key (tự tăng)
+  userId String @unique @map("user_id")
+
+  provider       Provider // Tên: "google", "facebook", hoặc "credentials" (cho email/pass)
+  providerUserId String?   @map("provider_user_id") // ID của user TỪ Google/Facebook
+
+  // Mật khẩu (chỉ dùng cho provider "credentials")
+  passwordHash String? @map("password_hash") @db.VarChar(255) // 🔐 Chỉ có giá trị khi là đăng ký 'credentials'
+
+  // Bạn cũng có thể lưu token ở đây nếu cần
+  refreshToken String?
+
+  createdAt DateTime @default(now()) // 🗓️ Thời điểm tạo
+  updatedAt DateTime @updatedAt // 🔁 Tự động cập nhật khi thay đổi
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade) // Liên kết về User
+
+  @@unique([provider, providerUserId]) // Đảm bảo tính duy nhất: 1 user chỉ có 1 tài khoản Google
+}
+
 model Movie {
-  id              String      @id @default(uuid()) // 🔑 Primary key
-  public_id       String      @unique @db.VarChar(255) // 🔑 Public ID
-  title           String      @db.VarChar(500) // 🎬 Movie title (localized)
-  original_title  String?     @db.VarChar(500) // 🌍 Original language title
-  slug            String      @unique @db.VarChar(300) // 🔗 SEO-friendly URL identifier
-  description     String?     @db.Text // 📝 Movie description
-  type            MovieType // 📌 Movie or series
-  duration        Int? // ⏱️ Duration in minutes
-  status          MovieStatus @default(COMMING_SOON) // 📋 Current release status
-  imdb_rating     Decimal?    @db.Decimal(3, 1) // ⭐ IMDb rating
-  subtitled_count Int? // Total episodes with subtitles
-  dubbed_count    Int? // Total episodes with dubbed audio
-  voiceover_count Int? // Total episodes with voice-over
-  franchiseId     String? // Franchise ID chuỗi phim
-  partNumber      Int?
-  createdAt       DateTime    @default(now()) // 🗓️ Record creation time
-  updatedAt       DateTime    @updatedAt // 🗓️ Record last update time
+  id             String      @id @default(uuid()) // 🔑 Primary key
+  publicId       String      @unique @map("public_id") @db.VarChar(255) // 🔑 Public ID
+  title          String      @db.VarChar(500) // 🎬 Movie title (localized)
+  originalTitle  String?     @map("original_title") @db.VarChar(500) // 🌍 Original language title
+  slug           String      @unique @db.VarChar(300) // 🔗 SEO-friendly URL identifier
+  description    String?     @db.Text // 📝 Movie description
+  type           MovieType // 📌 Movie or series
+  duration       Int? // ⏱️ Duration in minutes
+  status         MovieStatus @default(COMMING_SOON) // 📋 Current release status
+  imdbRating     Decimal?    @map("imdb_rating") @db.Decimal(3, 1) // ⭐ IMDb rating
+  subtitledCount Int?        @map("subtitled_count") // Total episodes with subtitles
+  dubbedCount    Int?        @map("dubbed_count") // Total episodes with dubbed audio
+  voiceoverCount Int?        @map("voiceover_count") // Total episodes with voice-over
+  franchiseId    String? // Franchise ID chuỗi phim
+  partNumber     Int?
+  createdAt      DateTime    @default(now()) @map("created_at") // 🗓️ Record creation time
+  updatedAt      DateTime    @updatedAt @map("updated_at") // 🗓️ Record last update time
 
   // Relations
   images        MovieImage[]
@@ -119,12 +153,12 @@ model Episode {
   title         String      @db.VarChar(255)
   description   String      @db.Text
   duration      Int?
-  releaseDate   DateTime
-  videoUrl      String?     @db.VarChar(500)
-  trailerUrl    String?     @db.VarChar(500)
+  releaseDate   DateTime    @map("release_date")
+  videoUrl      String?     @map("video_url") @db.VarChar(500)
+  trailerUrl    String?     @map("trailer_url") @db.VarChar(500)
   status        MovieStatus @default(COMMING_SOON)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
 
   // Relations
   movie           Movie           @relation(fields: [movieId], references: [id], onDelete: Cascade)
@@ -139,8 +173,8 @@ model Season {
   title        String   @db.VarChar(255)
   description  String   @db.Text
   episodeCount Int
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
   // Relations
   movie    Movie     @relation(fields: [movieId], references: [id], onDelete: Cascade)
@@ -150,7 +184,8 @@ model Season {
 model Franchise {
   id        String   @id @default(uuid())
   name      String   @db.VarChar(255)
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
   movies Movie[]
@@ -162,8 +197,8 @@ model MovieImage {
   path      String   @db.VarChar(500)
   type      String   @db.VarChar(50)
   format    String   @db.VarChar(50)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
   movie Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
@@ -181,7 +216,7 @@ model MovieGenre {
 
 model Genre {
   id        String   @id @default(uuid())
-  name      String   @db.VarChar(255) @unique
+  name      String   @unique @db.VarChar(255)
   slug      String   @unique @db.VarChar(255)
   createdAt DateTime @default(now())
 
@@ -191,7 +226,7 @@ model Genre {
 
 model Topic {
   id          String   @id @default(uuid())
-  name        String   @db.VarChar(255) @unique
+  name        String   @unique @db.VarChar(255)
   description String   @db.Text
   slug        String   @unique @db.VarChar(255)
   createdAt   DateTime @default(now())
@@ -223,27 +258,27 @@ model Company {
 }
 
 model MovieCompany {
-  movieId    String
-  movie      Movie    @relation(fields: [movieId], references: [id])
+  movieId   String
+  movie     Movie    @relation(fields: [movieId], references: [id])
   companyId String
-  company   Company @relation(fields: [companyId], references: [id])
-  createdAt  DateTime @default(now())
+  company   Company  @relation(fields: [companyId], references: [id])
+  createdAt DateTime @default(now())
 
   @@id([movieId, companyId])
 }
 
 model People {
   id           String    @id @default(uuid())
-  public_id    String    @unique @db.VarChar(255)
+  publicId     String    @unique @map("public_id") @db.VarChar(255)
   originalName String    @db.VarChar(255)
-  birthDate    DateTime?
-  avatarUrl    String?   @db.VarChar(500)
+  birthDate    DateTime? @map("birth_date")
+  avatarUrl    String?   @map("avatar_url") @db.VarChar(500)
   nationality  String?   @db.VarChar(255)
   biography    String?   @db.Text
   gender       Gender?
   slug         String    @unique @db.VarChar(255)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
 
   // Relations
   movies MoviePeople[]
@@ -267,9 +302,9 @@ model Rating {
   rating     Int
   review     String?  @db.Text
   isSpoiler  Boolean  @default(false)
-  likesCount Int      @default(0)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  likesCount Int      @default(0) @map("likes_count")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   // Relations
   user  User  @relation(fields: [userId], references: [id])
@@ -296,11 +331,11 @@ model Comment {
   parentId  String?
 
   content       String   @db.Text
-  likesCount    Int      @default(0)
-  dislikesCount Int      @default(0)
-  isSpoiler     Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  likesCount    Int      @default(0) @map("likes_count")
+  dislikesCount Int      @default(0) @map("dislikes_count")
+  isSpoiler     Boolean  @default(false) @map("is_spoiler")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
   // Relations
   user         User          @relation(fields: [userId], references: [id])
@@ -315,7 +350,7 @@ model CommentLike {
   userId    String
   commentId String
   type      ReactionType
-  createdAt DateTime     @default(now())
+  createdAt DateTime     @default(now()) @map("created_at")
 
   // Relations
   user    User    @relation(fields: [userId], references: [id])
@@ -329,11 +364,11 @@ model WatchProgress {
   userId      String
   movieId     String
   episodeId   String
-  currentTime Int // thời gian xem (giây)
-  isCompleted Boolean @default(false)
+  currentTime Int     @map("current_time") // thời gian xem (giây)
+  isCompleted Boolean @default(false) @map("is_completed")
 
-  updatedAt DateTime @updatedAt
-  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
 
   // Relations
   user    User     @relation(fields: [userId], references: [id])

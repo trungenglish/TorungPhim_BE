@@ -12,7 +12,7 @@ import { CreateTopicDto } from './dto/create-topic.dto';
 import { UpdateTopicDto } from './dto/update-topic.dto';
 import { ApiCommonResponses } from 'src/common/decorators/api-common-responses.decorator';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-
+import { Public } from 'src/common/decorators/public-route.decorator';
 @Controller('topic')
 export class TopicController {
   constructor(private readonly topicService: TopicService) {}
@@ -26,6 +26,7 @@ export class TopicController {
   }
 
   @Get()
+  @Public()
   @ApiCommonResponses()
   @ApiOperation({ summary: 'Lấy tất cả chủ đề' })
   @ApiResponse({ status: 200, description: 'Lấy tất cả chủ đề thành công.' })
@@ -34,6 +35,7 @@ export class TopicController {
   }
 
   @Get(':id')
+  @Public()
   @ApiCommonResponses()
   @ApiOperation({ summary: 'Lấy chủ đề theo id' })
   @ApiResponse({ status: 200, description: 'Lấy chủ đề theo id thành công.' })

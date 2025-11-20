@@ -18,10 +18,10 @@ import { Topic } from '@prisma/client';
 export class TopicService {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(createTopicDto: CreateTopicDto): Promise<Topic> {
+  async create(createTopicDto: CreateTopicDto): Promise<Topic> {
     const slug = toSlug(createTopicDto.name);
 
-    return this.prisma.topic.create({
+    return await this.prisma.topic.create({
       data: {
         name: createTopicDto.name,
         description: createTopicDto.description,
@@ -30,19 +30,19 @@ export class TopicService {
     });
   }
 
-  findAll(): Promise<Topic[]> {
-    return this.prisma.topic.findMany({
+  async findAll(): Promise<Topic[]> {
+    return await this.prisma.topic.findMany({
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  findById(id: string): Promise<Topic> {
-    return this.prisma.topic.findUniqueOrThrow({
+  async findById(id: string): Promise<Topic> {
+    return await this.prisma.topic.findUniqueOrThrow({
       where: { id: id },
     });
   }
 
-  update(id: string, updateTopicDto: UpdateTopicDto) {
+  async update(id: string, updateTopicDto: UpdateTopicDto): Promise<Topic> {
     const data = {
       ...(updateTopicDto.name !== undefined && { name: updateTopicDto.name }),
       ...(updateTopicDto.description !== undefined && {
@@ -53,14 +53,14 @@ export class TopicService {
       }),
     };
 
-    return this.prisma.topic.update({
+    return await this.prisma.topic.update({
       where: { id: id },
       data,
     });
   }
 
-  remove(id: string) {
-    return this.prisma.topic.delete({
+  async remove(id: string): Promise<Topic> {
+    return await this.prisma.topic.delete({
       where: { id: id },
     });
   }

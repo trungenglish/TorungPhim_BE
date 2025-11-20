@@ -8,17 +8,20 @@ import { ConfigModule } from '@nestjs/config';
 import { GlobalExceptionFilter } from './common/filters/all-exception.filter';
 import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 import { AuthModule } from './modules/auth/auth.module';
-import { UsersModule } from './modules/user/user.module';
+import { UserModule } from './modules/user/user.module';
 import { winstonConfig } from './config/wiston.config';
 import { WinstonModule } from 'nest-winston';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
-import { MoviesModule } from './modules/movie/movie.module';
+import { MovieModule } from './modules/movie/movie.module';
 import { HealthModule } from './modules/health/health.module';
 import { envConfig, appConfig } from './config/env.config';
 import { PrismaModule } from './prisma/prisma.module';
 import { ValidationPipe } from './common/pipes/validation.pipe';
 import { GenreModule } from './modules/genre/genre.module';
 import { TopicModule } from './modules/topic/topic.module';
+import { JwtAuthGuard } from './modules/auth/guard/jwt-auth.guard';
+import { RolesGuard } from './common/guards/roles.guard';
+import { createAppGuards } from './common/helpers/module.helper';
 
 @Module({
   imports: [
@@ -29,13 +32,14 @@ import { TopicModule } from './modules/topic/topic.module';
     WinstonModule.forRootAsync(winstonConfig),
     PrismaModule,
     AuthModule,
-    UsersModule,
+    UserModule,
     GenreModule,
     TopicModule,
-    MoviesModule,
+    MovieModule,
     HealthModule,
   ],
   providers: [
+    ...createAppGuards(JwtAuthGuard, RolesGuard),
     {
       provide: APP_FILTER,
       useClass: GlobalExceptionFilter,
