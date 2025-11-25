@@ -4,7 +4,7 @@ import { User } from '@prisma/client';
 import { UserWithAuthProviders } from './types';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
-import * as bcrypt from 'bcryptjs';
+import { hashPassword } from 'src/common/utils/password';
 
 /**
  * Service để quản lý Người dùng (User).
@@ -53,7 +53,7 @@ export class UserService {
   }
 
   async createUserAdmin(createUserDto: CreateUserDto): Promise<User> {
-    const hashedPassword = bcrypt.hashSync(createUserDto.password, 10);
+    const hashedPassword = hashPassword(createUserDto.password);
 
     return await this.prisma.user.create({
       data: {

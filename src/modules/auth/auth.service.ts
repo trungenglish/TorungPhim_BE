@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserService } from '../user/user.service';
-import * as bcrypt from 'bcryptjs';
+import { hashPassword, comparePassword } from 'src/common/utils/password';
 import { UserWithAuthProviders } from '../user/types';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
@@ -43,7 +43,7 @@ export class AuthService {
   }
 
   isValidPassword(password: string, hashedPassword: string): boolean {
-    return bcrypt.compareSync(password, hashedPassword);
+    return comparePassword(password, hashedPassword);
   }
 
   loginUser(user: UserWithAuthProviders) {
@@ -66,7 +66,9 @@ export class AuthService {
     if (existingUser) {
       throw new ConflictException('User already exists with this email');
     }
-    const hashedPassword = bcrypt.hashSync(registerDto.password, 10);
+
+    const hashedPassword = hashPassword(registerDto.password);
+
     return await this.prisma.user.create({
       data: {
         email: registerDto.email,
