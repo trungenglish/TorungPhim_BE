@@ -36,6 +36,13 @@ export class GenreService {
     });
   }
 
+  async findManyByIds(ids: string[]) {
+    return await this.prisma.genre.findMany({
+      where: { id: { in: ids } },
+      select: { id: true },
+    });
+  }
+
   async findById(id: string): Promise<Genre> {
     return await this.prisma.genre.findUniqueOrThrow({
       where: { id: id },

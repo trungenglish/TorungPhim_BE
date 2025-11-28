@@ -13,6 +13,7 @@ import { UpdateTopicDto } from './dto/update-topic.dto';
 import { ApiCommonResponses } from 'src/common/decorators/api-common-responses.decorator';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public-route.decorator';
+
 @Controller('topic')
 export class TopicController {
   constructor(private readonly topicService: TopicService) {}
