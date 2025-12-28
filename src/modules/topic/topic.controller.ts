@@ -10,9 +10,11 @@ import {
 import { TopicService } from './topic.service';
 import { CreateTopicDto } from './dto/create-topic.dto';
 import { UpdateTopicDto } from './dto/update-topic.dto';
+import { Topic } from '@prisma/client';
 import { ApiCommonResponses } from 'src/common/decorators/api-common-responses.decorator';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public-route.decorator';
+
 @Controller('topic')
 export class TopicController {
   constructor(private readonly topicService: TopicService) {}
@@ -21,7 +23,9 @@ export class TopicController {
   @ApiCommonResponses()
   @ApiOperation({ summary: 'Tạo một chủ đề mới' })
   @ApiResponse({ status: 201, description: 'Tạo chủ đề thành công.' })
-  handleCreateTopic(@Body() createTopicDto: CreateTopicDto) {
+  async handleCreateTopic(
+    @Body() createTopicDto: CreateTopicDto,
+  ): Promise<Topic> {
     return this.topicService.create(createTopicDto);
   }
 
@@ -30,7 +34,7 @@ export class TopicController {
   @ApiCommonResponses()
   @ApiOperation({ summary: 'Lấy tất cả chủ đề' })
   @ApiResponse({ status: 200, description: 'Lấy tất cả chủ đề thành công.' })
-  handleFindAllTopic() {
+  async handleFindAllTopic(): Promise<Topic[]> {
     return this.topicService.findAll();
   }
 
@@ -39,7 +43,7 @@ export class TopicController {
   @ApiCommonResponses()
   @ApiOperation({ summary: 'Lấy chủ đề theo id' })
   @ApiResponse({ status: 200, description: 'Lấy chủ đề theo id thành công.' })
-  handleFindOneTopic(@Param('id') id: string) {
+  async handleFindOneTopic(@Param('id') id: string): Promise<Topic> {
     return this.topicService.findById(id);
   }
 
@@ -50,10 +54,10 @@ export class TopicController {
     status: 200,
     description: 'Cập nhật chủ đề theo id thành công.',
   })
-  handleUpdateTopic(
+  async handleUpdateTopic(
     @Param('id') id: string,
     @Body() updateTopicDto: UpdateTopicDto,
-  ) {
+  ): Promise<Topic> {
     return this.topicService.update(id, updateTopicDto);
   }
 
@@ -61,7 +65,7 @@ export class TopicController {
   @ApiCommonResponses()
   @ApiOperation({ summary: 'Xóa chủ đề theo id' })
   @ApiResponse({ status: 204, description: 'Xóa chủ đề theo id thành công.' })
-  handleRemoveTopic(@Param('id') id: string) {
+  async handleRemoveTopic(@Param('id') id: string): Promise<Topic> {
     return this.topicService.remove(id);
   }
 }

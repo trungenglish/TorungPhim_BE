@@ -12,12 +12,12 @@ export class UserController {
 
   @Roles('admin')
   @Get()
-  handleFindAll(): Promise<User[]> {
+  async handleFindAll(): Promise<User[]> {
     return this.userService.findAll();
   }
 
   @Get('email/:email')
-  handleFindByEmail(
+  async handleFindByEmail(
     @Param('email') email: string,
   ): Promise<UserWithAuthProviders | null> {
     return this.userService.findByEmail(email);
@@ -25,12 +25,14 @@ export class UserController {
 
   @Roles('admin')
   @Post('create-admin')
-  handleCreateUserAdmin(@Body() createUserDto: CreateUserDto): Promise<User> {
+  async handleCreateUserAdmin(
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<User> {
     return this.userService.createUserAdmin(createUserDto);
   }
 
   @Patch(':id')
-  handleUpdateProfile(
+  async handleUpdateProfile(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<User> {

@@ -19,6 +19,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ValidationPipe } from './common/pipes/validation.pipe';
 import { GenreModule } from './modules/genre/genre.module';
 import { TopicModule } from './modules/topic/topic.module';
+import { CompanyModule } from './modules/company/company.module';
 import { JwtAuthGuard } from './modules/auth/guard/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { createAppGuards } from './common/helpers/module.helper';
@@ -35,6 +36,7 @@ import { createAppGuards } from './common/helpers/module.helper';
     UserModule,
     GenreModule,
     TopicModule,
+    CompanyModule,
     MovieModule,
     HealthModule,
   ],
