@@ -24,7 +24,9 @@ export class MovieService {
     const slug = toSlug(createMovieDto.title);
     const publicId = nanoid(8);
 
+    // validate genres, topics, companies, people, franchiseId
     try {
+      // validate genres
       if (genres && genres.length > 0) {
         const existingGenres = await this.genreService.findManyByIds(genres);
         const existingGenreIds = existingGenres.map((g) => g.id);
@@ -39,12 +41,14 @@ export class MovieService {
         }
       }
 
+      // validate topics
       if (topics && topics.length > 0) {
         const existingTopics = await this.topicService.findManyByIds(topics);
         const existingTopicIds = existingTopics.map((t) => t.id);
         const missingTopics = topics.filter(
           (id) => !existingTopicIds.includes(id),
         );
+
         if (missingTopics.length > 0) {
           throw new NotFoundException(
             `Không tìm thấy chủ đề với ID: ${missingTopics.join(', ')}`,
@@ -53,7 +57,7 @@ export class MovieService {
         }
       }
 
-      // Validate companies nếu có
+      // Validate companies
       if (companies && companies.length > 0) {
         const existingCompanies = await this.prisma.company.findMany({
           where: { id: { in: companies } },
@@ -63,6 +67,7 @@ export class MovieService {
         const missingCompanies = companies.filter(
           (id) => !existingCompanyIds.includes(id),
         );
+
         if (missingCompanies.length > 0) {
           throw new NotFoundException(
             `Không tìm thấy công ty với ID: ${missingCompanies.join(', ')}`,
@@ -71,7 +76,7 @@ export class MovieService {
         }
       }
 
-      // Validate people nếu có
+      // Validate people
       if (people && people.length > 0) {
         const peopleIds = people.map((p) => p.id);
         const existingPeople = await this.prisma.people.findMany({
@@ -90,7 +95,7 @@ export class MovieService {
         }
       }
 
-      // Validate franchiseId nếu có
+      // Validate franchiseId
       if (franchiseId) {
         const franchise = await this.prisma.franchise.findUnique({
           where: { id: franchiseId },
