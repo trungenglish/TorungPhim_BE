@@ -30,6 +30,13 @@ export class TopicService {
     });
   }
 
+  async findManyByIds(ids: string[]) {
+    return await this.prisma.topic.findMany({
+      where: { id: { in: ids } },
+      select: { id: true },
+    });
+  }
+
   async findAll(): Promise<Topic[]> {
     return await this.prisma.topic.findMany({
       orderBy: { createdAt: 'desc' },

@@ -1,32 +1,35 @@
-import { Controller, Get, Param, Delete } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { MovieService } from './movie.service';
+import { CreateMovieDto } from './dto/create-movie.dto';
+import { Movie } from '@prisma/client';
 
 @Controller('movies')
 export class MovieController {
   constructor(private readonly movieService: MovieService) {}
 
-  // @Post()
-  // create(@Body() createMovieDto: CreateMovieDto) {
-  //   return this.moviesService.create(createMovieDto);
-  // }
+  @Post()
+  async create(@Body() createMovieDto: CreateMovieDto): Promise<Movie> {
+    return this.movieService.create(createMovieDto);
+  }
 
   @Get()
-  findAll() {
-    return this.movieService.findAll();
+  async findAll(): Promise<Movie[]> {
+    const movies = await this.movieService.findAll();
+    return movies;
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.movieService.findOne(+id);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.movieService.findOne(+id);
+  // }
 
   // @Patch(':id')
   // update(@Param('id') id: string, @Body() updateMovieDto: UpdateMovieDto) {
   //   return this.moviesService.update(+id, updateMovieDto);
   // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.movieService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.movieService.remove(+id);
+  // }
 }
